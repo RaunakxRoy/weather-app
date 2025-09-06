@@ -73,9 +73,9 @@ async function updateWeatherInfo(city){
     weatherSummaryImg.src = `assets/weather/${getWeatherIcon(id)}`;
 
     // Set date
-    const localDate = new Date(Date.now() + timezone * 1000);
-    const dateOptions = { weekday: 'short', day: '2-digit', month: 'short' };
-    correntDateText.textContent = localDate.toLocaleDateString('en-US', dateOptions);
+    const currDate = new Date();
+    const dateOption = { weekday: 'short', day: '2-digit', month: 'short' };
+    correntDateText.textContent = currDate.toLocaleDateString('en-GB', dateOption);
 
     // Set live time
     if(timeInterval) clearInterval(timeInterval);
@@ -95,37 +95,25 @@ async function updateWeatherInfo(city){
 
 // Forecast function
 async function updateForecastInfo(city) {
-    // Get forecast and current weather (for timezone)
-    const forecastData = await getFetchData("forecast", city);
-    const weatherData = await getFetchData("weather", city);
-    const timezone = weatherData.timezone; // in seconds
+    const forecastData = await getFetchData('forecast', city);
+    forecastItemsContainer.innerHTML = ''; // clear previous forecast
 
-    // Get city local date today at 00:00
-    const nowUTC = new Date();
-    const todayLocal = new Date(nowUTC.getTime() + timezone * 1000);
-    const todayLocalMidnight = new Date(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate());
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    const timeTaken = '12:00:00';
-    forecastItemsContainer.innerHTML = '';
-
-    forecastData.list.forEach(forecast => {
-        if (!forecast.dt_txt.includes(timeTaken)) return;
-
-        // Convert forecast time to city local date
-        const forecastUTC = new Date(forecast.dt * 1000);
-        const forecastLocal = new Date(forecastUTC.getTime() + timezone * 1000);
-        const forecastLocalMidnight = new Date(forecastLocal.getFullYear(), forecastLocal.getMonth(), forecastLocal.getDate());
-
-        // Only include forecasts after today
-        if (forecastLocalMidnight.getTime() > todayLocalMidnight.getTime()) {
-            updateForecastItems(forecast);
+    // Loop through forecast list and pick only "12:00:00" entries
+    forecastData.list.forEach(item => {
+        if (item.dt_txt.includes("12:00:00")) {
+            const forecastDate = item.dt_txt.split(' ')[0];
+            if (forecastDate !== today) { // skip today
+                updateForecastItems(item, forecastData.city.timezone);
+            }
         }
     });
 }
 
 
 
-function updateForecastItems(weatherData, timezoneOffset){
+function updateForecastItems(weatherData){
     const { dt_txt: date, weather: [{id}], main: {temp} } = weatherData;
     const dateTaken = new Date(date);
     const dateOption = { day: '2-digit', month: 'short' };
