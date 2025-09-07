@@ -133,3 +133,44 @@ function showDisplaySection(section){
     [weatherInfoSection, searchCitySection, notFoundSection].forEach(sec => sec.style.display = 'none');
     section.style.display = 'flex';
 }
+
+const suggestionsContainer = document.createElement("div");
+suggestionsContainer.classList.add("suggestions");
+cityInput.parentNode.appendChild(suggestionsContainer);
+
+// fetch city suggestions
+async function fetchCitySuggestions(query) {
+    const url = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${apiKey}`;
+    const resp = await fetch(url);
+    return resp.json();
+}
+
+// show suggestions under input box
+async function showSuggestions(query) {
+    if (!query) {
+        suggestionsContainer.innerHTML = "";
+        return;
+    }
+
+    const cities = await fetchCitySuggestions(query);
+    suggestionsContainer.innerHTML = "";
+
+    cities.forEach(city => {
+        const option = document.createElement("div");
+        option.classList.add("suggestion-item");
+        option.textContent = `${city.name} (${city.country})`;
+        
+        option.addEventListener("click", () => {
+            cityInput.value = city.name;
+            suggestionsContainer.innerHTML = "";
+            updateWeatherInfo(city.name);
+        });
+
+        suggestionsContainer.appendChild(option);
+    });
+}
+
+// listen to typing in search box
+cityInput.addEventListener("input", (e) => {
+    showSuggestions(e.target.value.trim());
+});

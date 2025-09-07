@@ -175,3 +175,32 @@ body::before{
     filter: brightness(0.9); /* subtle dark tint */
 }
 /* END SECTION: MESSAGE */
+
+/* suggesion box */
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(20, 20, 20, 0.95); /* dark grey background */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.suggestion-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 400;
+    transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+    background: rgba(60, 60, 60, 0.9); /* lighter dark hover */
+}
+
+/* suggesion box */
